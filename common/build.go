@@ -394,16 +394,17 @@ func (b *Build) GetRemoteURL() string {
 	cloneURL := strings.TrimRight(b.Runner.CloneURL, "/")
 
 	if !strings.HasPrefix(cloneURL, "http") {
-		return b.GitInfo.RepoURL
+		return b.RepoURL
 	}
 
 	variables := b.GetAllVariables()
-	ciJobToken := variables.Get("CI_JOB_TOKEN")
-	ciProjectPath := variables.Get("CI_PROJECT_PATH")
+	ciJobToken := variables.Get("CI_BUILD_TOKEN")
+	// b.RepoURL = http://gitlab.example.com/group/project.git
+	projectPath := strings.SplitAfterN(b.RepoURL, "/", 4)[3]
 
 	splits := strings.SplitAfterN(cloneURL, "://", 2)
 
-	return fmt.Sprintf("%sgitlab-ci-token:%s@%s/%s.git", splits[0], ciJobToken, splits[1], ciProjectPath)
+	return fmt.Sprintf("%sgitlab-ci-token:%s@%s/%s", splits[0], ciJobToken, splits[1], projectPath)
 }
 
 func (b *Build) GetGitDepth() string {
